@@ -4,12 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let allNewsData = [];
 
-    // news.json 파일 읽기 (캐시 방지 타임스탬프 추가)
+    // news.json 파일 읽기
     fetch('./news.json?t=' + new Date().getTime())
         .then(response => {
-            if (!response.ok) {
-                throw new Error('news.json 파일을 찾을 수 없습니다.');
-            }
+            if (!response.ok) throw new Error('news.json 로드 실패');
             return response.json();
         })
         .then(data => {
@@ -20,9 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 전체 기사 표시
             renderNews(allNewsData);
-            // 버튼 클릭 이벤트 연결
             setupButtons();
         })
         .catch(error => {
@@ -32,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-    // 화면에 뉴스 카드 그리는 함수
     function renderNews(articles) {
         if (!newsContainer) return;
 
@@ -55,12 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // 카테고리 버튼 클릭 이벤트 연결 함수
     function setupButtons() {
         categoryButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                // 기존 active 클래스 제거 후 클릭한 버튼에 추가
-                categoryButtons.forEach(b => b.classList.remove('active'));
+                // 기존 모든 버튼에서 active 제거 및 파란색 스타일 초기화
+                categoryButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.backgroundColor = '';
+                    b.style.color = '';
+                });
+
+                // 클릭한 버튼에 active 클래스 추가
                 e.target.classList.add('active');
 
                 const selectedCategory = e.target.innerText.trim();
