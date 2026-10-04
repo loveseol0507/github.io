@@ -1,22 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
+  renderCategoryButtons();
   fetchNews();
 });
 
+// keywords.js의 keywords 객체를 기반으로 출입처 버튼 생성
+function renderCategoryButtons() {
+  const container = document.getElementById('category-container');
+  if (!container || typeof keywords === 'undefined') return;
+
+  container.innerHTML = '';
+  // '전체' 및 keywords 객체의 키값(자동차, 물류, 로봇 등) 배열 생성
+  const categories = ['전체', ...Object.keys(keywords)];
+  
+  categories.forEach((cat, index) => {
+    const btn = document.createElement('button');
+    btn.className = `category-btn ${index === 0 ? 'active' : ''}`;
+    btn.textContent = cat;
+    btn.onclick = () => filterNews(cat, btn);
+    container.appendChild(btn);
+  });
+}
+
+let allNews = [];
+
+// news.json 데이터 불러오기
 async function fetchNews() {
   const container = document.getElementById('news-container');
-  
   try {
     const response = await fetch('news.json');
     if (!response.ok) throw new Error('뉴스 데이터를 불러올 수 없습니다.');
     
-    const newsData = await response.json();
-    renderNews(newsData);
+    allNews = await response.json();
+    renderNews(allNews);
   } catch (error) {
     console.error('Error:', error);
     container.innerHTML = `<p style="color:red;">뉴스를 불러오는 중 오류가 발생했습니다.</p>`;
   }
 }
 
+// 뉴스 카드 화면 출력
 function renderNews(articles) {
   const container = document.getElementById('news-container');
   container.innerHTML = '';
@@ -30,7 +52,6 @@ function renderNews(articles) {
     const newsCard = document.createElement('div');
     newsCard.className = 'news-card';
 
-    // news.json의 "source" 키값을 정상적으로 읽어오도록 수정
     const mediaName = article.source || article.media || '언론사';
 
     newsCard.innerHTML = `
@@ -42,4 +63,17 @@ function renderNews(articles) {
 
     container.appendChild(newsCard);
   });
+}
+
+// 출입처 버튼 클릭 시 필터링
+function filterNews(category, selectedBtn) {
+  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+  selectedBtn.classList.add('active');
+
+  if (category === '전체') {
+    renderNews(allNews);
+  } else {
+    const filtered = allNews.filter(item => item.category === category);
+    renderNews(filtered);
+  }
 }
