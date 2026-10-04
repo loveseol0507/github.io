@@ -1,79 +1,77 @@
 document.addEventListener('DOMContentLoaded', () => {
-  renderCategoryButtons();
-  fetchNews();
-});
-
-// keywords.js의 keywords 객체를 기반으로 출입처 버튼 생성
-function renderCategoryButtons() {
-  const container = document.getElementById('category-container');
-  if (!container || typeof keywords === 'undefined') return;
-
-  container.innerHTML = '';
-  // '전체' 및 keywords 객체의 키값(자동차, 물류, 로봇 등) 배열 생성
-  const categories = ['전체', ...Object.keys(keywords)];
-  
-  categories.forEach((cat, index) => {
-    const btn = document.createElement('button');
-    btn.className = `category-btn ${index === 0 ? 'active' : ''}`;
-    btn.textContent = cat;
-    btn.onclick = () => filterNews(cat, btn);
-    container.appendChild(btn);
-  });
-}
-
-let allNews = [];
-
-// news.json 데이터 불러오기
-async function fetchNews() {
-  const container = document.getElementById('news-container');
-  try {
-    const response = await fetch('news.json');
-    if (!response.ok) throw new Error('뉴스 데이터를 불러올 수 없습니다.');
+    const newsContainer = document.getElementById('news-container') || document.querySelector('.news-list');
+    const categoryButtons = document.querySelectorAll('#category-container button, .category-group button, .category-btn');
     
-    allNews = await response.json();
-    renderNews(allNews);
-  } catch (error) {
-    console.error('Error:', error);
-    container.innerHTML = `<p style="color:red;">뉴스를 불러오는 중 오류가 발생했습니다.</p>`;
-  }
-}
+    let allNewsData = [];
 
-// 뉴스 카드 화면 출력
-function renderNews(articles) {
-  const container = document.getElementById('news-container');
-  container.innerHTML = '';
+    // news.json 파일 읽기 (캐시 방지 타임스탬프 추가)
+    fetch('./news.json?t=' + new Date().getTime())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('news.json 파일을 찾을 수 없습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            allNewsData = data;
+            
+            if (!allNewsData || allNewsData.length === 0) {
+                if (newsContainer) newsContainer.innerHTML = '<p style="padding:20px; color:#666;">수집된 기사가 없습니다.</p>';
+                return;
+            }
 
-  if (!articles || articles.length === 0) {
-    container.innerHTML = '<p>등록된 뉴스가 없습니다.</p>';
-    return;
-  }
+            // 전체 기사 표시
+            renderNews(allNewsData);
+            // 버튼 클릭 이벤트 연결
+            setupButtons();
+        })
+        .catch(error => {
+            console.error('데이터 로드 실패:', error);
+            if (newsContainer) {
+                newsContainer.innerHTML = `<p style="padding:20px; color:red;">뉴스 데이터를 불러오는 데 실패했습니다.<br>(${error.message})</p>`;
+            }
+        });
 
-  articles.forEach(article => {
-    const newsCard = document.createElement('div');
-    newsCard.className = 'news-card';
+    // 화면에 뉴스 카드 그리는 함수
+    function renderNews(articles) {
+        if (!newsContainer) return;
 
-    const mediaName = article.source || article.media || '언론사';
+        if (!articles || articles.length === 0) {
+            newsContainer.innerHTML = '<p style="padding:20px; color:#666;">해당 카테고리의 기사가 없습니다.</p>';
+            return;
+        }
 
-    newsCard.innerHTML = `
-      <h3><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></h3>
-      <div class="meta">
-        <span>${mediaName}</span> | <span>${article.date || '최신'}</span>
-      </div>
-    `;
+        newsContainer.innerHTML = articles.map(item => `
+            <div class="news-card" style="background:#fff; border:1px solid #e1e4e8; border-radius:8px; padding:18px; margin-bottom:12px; text-align:left;">
+                <h3 style="margin:0 0 8px 0; font-size:17px; font-weight:bold;">
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color:#1a0dab; text-decoration:none;">
+                        ${item.title}
+                    </a>
+                </h3>
+                <div style="font-size:13px; color:#666;">
+                    <span>${item.source || '언론사'}</span> | <span>${item.date || '최신'}</span> | <span style="font-weight:bold; color:#0056b3;">[${item.category}]</span>
+                </div>
+            </div>
+        `).join('');
+    }
 
-    container.appendChild(newsCard);
-  });
-}
+    // 카테고리 버튼 클릭 이벤트 연결 함수
+    function setupButtons() {
+        categoryButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // 기존 active 클래스 제거 후 클릭한 버튼에 추가
+                categoryButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
 
-// 출입처 버튼 클릭 시 필터링
-function filterNews(category, selectedBtn) {
-  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-  selectedBtn.classList.add('active');
+                const selectedCategory = e.target.innerText.trim();
 
-  if (category === '전체') {
-    renderNews(allNews);
-  } else {
-    const filtered = allNews.filter(item => item.category === category);
-    renderNews(filtered);
-  }
-}
+                if (selectedCategory === '전체') {
+                    renderNews(allNewsData);
+                } else {
+                    const filtered = allNewsData.filter(item => item.category === selectedCategory);
+                    renderNews(filtered);
+                }
+            });
+        });
+    }
+});
