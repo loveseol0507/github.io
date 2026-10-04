@@ -7,29 +7,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
-        <h1 style="text-align: center; margin-bottom: 30px;">출입처 최신 기사 추천</h1>
+    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+        <h1 style="margin-bottom: 24px;">출입처 최신 기사 추천</h1>
         
         <!-- 카테고리 버튼 영역 -->
-        <div id="category-container" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px;">
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #007bff; color: white; cursor: pointer;">전체</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">자동차</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">물류</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">로봇</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">철강</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">비철금속</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">전력기기</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">에너지</button>
-            <button style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer;">화학소재</button>
+        <div id="category-container" style="margin-bottom: 20px;">
+            <button class="category-btn active">전체</button>
+            <button class="category-btn">자동차</button>
+            <button class="category-btn">물류</button>
+            <button class="category-btn">로봇</button>
+            <button class="category-btn">철강</button>
+            <button class="category-btn">비철금속</button>
+            <button class="category-btn">전력기기</button>
+            <button class="category-btn">에너지</button>
+            <button class="category-btn">화학소재</button>
         </div>
 
         <!-- 뉴스 카드 출력 영역 -->
         <div id="news-container">
-            <p style="text-align: center; color: #888;">기사를 불러오는 중입니다...</p>
+            <p style="padding: 20px; color: #666;">기사를 불러오는 중입니다...</p>
         </div>
     </div>
 
-    <!-- 스크립트를 body 맨 아래 배치 -->
     <script src="app.js"></script>
 </body>
 </html>
