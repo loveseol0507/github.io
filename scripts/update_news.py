@@ -4,7 +4,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-# 1. 저장할 경로 지정
+# 1. 저장할 경로 지정 (프로젝트 최상위 루트의 news.json)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_PATH = os.path.abspath(os.path.join(BASE_DIR, '..', 'news.json'))
 
@@ -32,15 +32,19 @@ print("뉴스 크롤링 시작...")
 for category, keywords in CATEGORIES.items():
     cat_count = 0
     for keyword in keywords:
+        if cat_count >= 10: # 카테고리당 최대 10개 채워지면 다음 카테고리로
+            break
+            
         url = f"https://search.naver.com/search.naver?where=news&query={keyword}"
         try:
             res = requests.get(url, headers=headers, timeout=10)
             soup = BeautifulSoup(res.text, 'html.parser')
             
+            # 네이버 뉴스 리스트 아이템 선택자
             articles = soup.select('ul.list_news > li')
             
             for article in articles:
-                if cat_count >= 10: # 카테고리당 최대 10개 기사 수집
+                if cat_count >= 10:
                     break
                     
                 title_tag = article.select_one('a.news_tit')
@@ -73,7 +77,9 @@ for category, keywords in CATEGORIES.items():
 print(f"총 {len(news_data)}건의 뉴스 수집 완료.")
 
 # 3. news.json 파일 저장
-with open(JSON_PATH, 'w', encoding='utf-8') as f:
-    json.dump(news_data, f, ensure_ascii=False, indent=2)
-
-print(f"파일 저장 완료: {JSON_PATH}")
+if len(news_data) > 0:
+    with open(JSON_PATH, 'w', encoding='utf-8') as f:
+        json.dump(news_data, f, ensure_ascii=False, indent=2)
+    print(f"파일 저장 완료: {JSON_PATH}")
+else:
+    print("수집된 뉴스가 없어 파일 저장을 건너뜁니다.")
